@@ -26,6 +26,14 @@ function speak(text){
   if('speechSynthesis' in window){
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'id-ID';
+    // Pilih voice Google jika tersedia
+    const voices = window.speechSynthesis.getVoices();
+    const google = voices.find(v=>/google/i.test(v.name));
+    if(google) u.voice = google;
+    // Percepat sedikit dan turunkan pitch agar terdengar lebih 'robotik'
+    u.rate = 1.25;
+    u.pitch = 0.2;
+    window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
   }
 }

@@ -3,6 +3,12 @@ import random
 import sys
 import os
 from gtts import gTTS
+try:
+    from pydub import AudioSegment
+    import numpy as np
+    PYDUB_AVAILABLE = True
+except Exception:
+    PYDUB_AVAILABLE = False
 
 # --- 1. INISIALISASI & CONFIGURATION ---
 pygame.init()
@@ -32,6 +38,35 @@ def buat_suara(teks, nama_file):
         try:
             tts = gTTS(text=teks, lang='id')
             tts.save(nama_file)
+            # Jika pydub tersedia, buat versi robotik yang dipercepat
+            if PYDUB_AVAILABLE:
+                try:
+                    robot_file = nama_file.replace('.mp3', '_robot.mp3')
+                    if not os.path.exists(robot_file):
+                        seg = AudioSegment.from_file(nama_file)
+                        seg = seg.set_channels(1)
+                        samples = np.array(seg.get_array_of_samples()).astype(np.float32)
+                        fr = seg.frame_rate
+                        # Amplitude modulation (ring modulation / tremolo) untuk efek robotik
+                        t = np.arange(len(samples)) / fr
+                        mod_freq = 30.0
+                        mod = 0.6 * np.sin(2 * np.pi * mod_freq * t) + 0.4
+                        samples *= mod
+                        # Clip and convert back to int16
+                        samples = np.clip(samples, -32768, 32767).astype(np.int16)
+                        proc = AudioSegment(
+                            samples.tobytes(),
+                            frame_rate=fr,
+                            sample_width=2,
+                            channels=1
+                        )
+                        # Percepat sedikit (mis. 1.15x)
+                        speed = 1.15
+                        faster = proc._spawn(proc.raw_data, overrides={"frame_rate": int(fr * speed)})
+                        # Simpan hasil robotik
+                        faster.export(robot_file, format='mp3')
+                except Exception as e:
+                    print(f"Gagal membuat versi robotik untuk {nama_file}: {e}")
         except Exception as e:
             print(f"Gagal membuat audio {nama_file}: {e}")
 
@@ -41,7 +76,12 @@ buat_suara("Kamu payah, jawabanmu salah!", "kalah.mp3")
 
 def putar_suara(nama_file):
     try:
-        pygame.mixer.music.load(nama_file)
+        # Jika ada versi robotik, mainkan yang robotik terlebih dahulu
+        robot_file = nama_file.replace('.mp3', '_robot.mp3')
+        if PYDUB_AVAILABLE and os.path.exists(robot_file):
+            pygame.mixer.music.load(robot_file)
+        else:
+            pygame.mixer.music.load(nama_file)
         pygame.mixer.music.play()
     except Exception as e:
         print(f"Gagal memutar audio: {e}")
