@@ -1,9 +1,11 @@
 * { box-sizing: border-box; }
-body { margin:0; font-family: Arial, sans-serif; background:#87CEEB; }
-#game { display:block; margin:0 auto; background: linear-gradient(#87CEEB,#87CEEB); }
-#ui { position: absolute; left:50px; top:50px; width:700px; color:#fff; }
+#game { position: fixed; left:0; top:0; width:100vw; height:100vh; display:block; z-index:0; background: linear-gradient(#87CEEB,#87CEEB); }
+#ui { position: absolute; left:50px; top:50px; width:700px; color:#fff; z-index:2; }
 #clue { font-size:24px; color: #FFA500; margin-bottom:8px; }
 #answer { font-size:28px; padding:6px; width:60%; }
 #check { font-size:18px; padding:8px 12px; margin-left:8px; }
 #status { margin-top:12px; font-size:20px; }
 #info { position: absolute; bottom:20px; left:50px; color:white; }
+
+/* Animal label styles */
+.animal { position: absolute; pointer-events: none; z-index:1 }
