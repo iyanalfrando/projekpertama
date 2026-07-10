@@ -11,6 +11,7 @@ resizeCanvas();
 const lettersEl = document.getElementById('letters');
 const answerInput = document.getElementById('answer');
 const checkBtn = document.getElementById('check');
+const revealBtn = document.getElementById('reveal');
 const statusEl = document.getElementById('status');
 
 let target = '';
@@ -45,7 +46,13 @@ function speak(text){
 }
 
 checkBtn.addEventListener('click', ()=>{ checkAnswer(); });
+revealBtn.addEventListener('click', revealAnswer);
 answerInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') checkAnswer(); });
+
+function revealAnswer(){
+  statusEl.textContent = `Jawaban benar: ${target}`;
+  statusEl.style.color = '#FFD700';
+}
 
 function checkAnswer(){
   const v = answerInput.value.trim().toUpperCase();
